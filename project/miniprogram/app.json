@@ -1,0 +1,13 @@
+{
+  "pages": [
+    "pages/base/base"
+  ],
+  "window": {
+    "backgroundColor": "#F6F6F6",
+    "backgroundTextStyle": "light",
+    "navigationBarBackgroundColor": "#E1E1E1",
+    "navigationBarTitleText": "空调伴侣",
+    "navigationBarTextStyle": "black"
+  },
+  "sitemapLocation": "sitemap.json"
+}

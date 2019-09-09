@@ -1,0 +1,14 @@
+<!-- 购物车蒙层 -->
+<view class="box {{aniStyle?'slideup':'slidedown'}}" wx:if="{{boxShow}}">
+  <view class="content">
+    <view 
+      class="item"
+      bindtap="handleItem" 
+      wx:for="{{boxList}}" 
+      wx:key="{{index}}"
+      data-id="{{index}}">
+      {{item}}
+    </view>
+  </view>
+  <view class="mask" bindtap="close"></view>
+</view>

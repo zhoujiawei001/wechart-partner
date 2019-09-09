@@ -1,3 +1,5 @@
 {
-  "usingComponents": {}
+  "usingComponents": {
+    "fade-up": "../../components/fadeUp/fadeUp"
+  }
 }

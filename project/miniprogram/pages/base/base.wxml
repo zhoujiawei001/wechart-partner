@@ -1,15 +1,15 @@
 <view class="banner">
-  <text class="txt">26°c</text>
+  <text class="txt">{{temp}}°c</text>
 </view>
 
 <scroll-view class="container" scroll-y="{{true}}">
   <!-- 状态一栏 -->
-  <view class="statusBar">
+  <view class="statusBar {{status?'active_1': ''}}">
     <view class="bar-lf">
       <view class="online">已开启</view>
       <view class="name">大金空调</view>
     </view>
-    <image class="bar-rt" src="../../images/switch.png"></image>
+    <image class="bar-rt" bindtap="switchFn" src="../../images/switch.png"></image>
   </view>
   <!-- 第一部分（数据） -->
   <view class="part-1">
@@ -27,28 +27,38 @@
     </view>
   </view>
   <!-- 第二部分（温度） -->
-  <view class="part-2">
-    <image class="pt2-lf" src="../../images/reduce.png"></image>
+  <view class="part-2 {{status?'': 'banned_click'}}">
+    <image class="pt2-lf" bindtap="adjustTemp" data-id="0" src="../../images/reduce.png"></image>
     <text class="pt2-md">温度</text>
-    <image class="pt2-rt" src="../../images/plus.png"></image>
+    <image class="pt2-rt" bindtap="adjustTemp" data-id="1" src="../../images/plus.png"></image>
   </view>
   <!-- 第三部分（状态） -->
-  <view class="part-3">
+  <view class="part-3 {{status?'': 'banned_click'}}">
     <!--第一列-->
     <view class="item">
-      <view class="cell">
+      <view class="cell" bindtap="clickMode">
         <view class="txt">
           <text class="g-txt">模式</text>
           <text class="s-txt">制冷</text>
         </view>
         <image class="icon" src="../../images/mode_cold.png"></image>
+        <fade-up 
+          box-show="{{isShowModeBox}}" 
+          prop-type="mode" 
+          bindclosebox="closeBoxModeFn"
+          bindselectedItem="handleSelectItem"></fade-up>
       </view>
-      <view class="cell">
+      <view class="cell"bindtap="clickWind" >
         <view class="txt">
           <text class="g-txt">风速</text>
           <text class="s-txt">自动</text>
         </view>
         <image class="icon" src="../../images/speed_auto.png"></image>
+        <fade-up 
+          box-show="{{isShowWindBox}}" 
+          prop-type="speed" 
+          bindclosebox="closeBoxWindFn"
+          bindselectedItem="handleSelectItem"></fade-up>
       </view>
     </view>
     <!--第二列-->
@@ -85,7 +95,7 @@
     </view>
   </view>
   <!-- 第四部分（定时） -->
-  <view class="part-4">
+  <view class="part-4 {{status?'': 'banned_click'}}">
     <view class="txt">
       <text class="g-txt">定时开关</text>
       <text class="s-txt">08:30打开空调，开机1:00，工作日重复</text>

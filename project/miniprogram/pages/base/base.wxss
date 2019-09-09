@@ -17,13 +17,13 @@
 .container{
   padding: 0 32rpx;
   background-color: #F2F2F2;
-  height: calc(100% - 320rpx);
+  /* height: calc(100% - 320rpx); */
   box-sizing: border-box;
 }
 /**状态一栏**/
 .statusBar{
   height: 152rpx;
-  background: radial-gradient(#71c2ff, #3b9ee9);
+  background-color: #B4B4B4;
   position: relative;
   border-radius: 8rpx;
   margin-top: 24rpx;
@@ -111,6 +111,7 @@
   margin-top: 16rpx;
 }
 .part-3 .cell {
+  position: relative;
   height: 136rpx;
   width: calc(50% - 8rpx);
   background-color: #fff;
@@ -161,4 +162,12 @@
 }
 .part-4 .txt .s-txt {
   margin-top: 6rpx;
+}
+/** 切换的class **/
+.active_1 {
+  background: radial-gradient(#71c2ff, #3b9ee9);
+}
+.banned_click {
+  opacity: .5;
+  pointer-events: none;
 }

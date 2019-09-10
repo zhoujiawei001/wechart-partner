@@ -37,48 +37,52 @@
     <!--第一列-->
     <view class="item">
       <view class="cell" bindtap="clickMode">
-        <view class="txt">
+        <view class="txt" style="color: {{status? '':'#000'}}">
           <text class="g-txt">模式</text>
-          <text class="s-txt">制冷</text>
+          <text class="s-txt">{{modes[mode]}}</text>
         </view>
-        <image class="icon" src="../../images/mode_cold.png"></image>
+        <image class="icon" src="../../images/{{status? '':'blackIcon/'}}mode{{mode}}.png"></image>
         <fade-up 
           box-show="{{isShowModeBox}}" 
-          prop-type="mode" 
+          prop-type="mode"
+          box-list="{{modes}}"
+          support-list="{{supportMode}}"
           bindclosebox="closeBoxModeFn"
           bindselectedItem="handleSelectItem"></fade-up>
       </view>
       <view class="cell"bindtap="clickWind" >
-        <view class="txt">
+        <view class="txt" style="color: {{status? '':'#000'}}">
           <text class="g-txt">风速</text>
-          <text class="s-txt">自动</text>
+          <text class="s-txt">{{speeds[speed]}}</text>
         </view>
-        <image class="icon" src="../../images/speed_auto.png"></image>
+        <image class="icon" src="../../images/{{status? '':'blackIcon/'}}speed{{speed}}.png"></image>
         <fade-up 
           box-show="{{isShowWindBox}}" 
-          prop-type="speed" 
+          prop-type="speed"
+          box-list="{{speeds}}"
+          support-list="{{supportSpeed}}"
           bindclosebox="closeBoxWindFn"
           bindselectedItem="handleSelectItem"></fade-up>
       </view>
     </view>
     <!--第二列-->
     <view class="item">
-      <view class="cell">
-        <view class="txt">
+      <view class="cell" bindtap="handleSwingLr" data-id="0">
+        <view class="txt" style="color: {{lr&&status?'':'#000'}}">
           <text class="g-txt">左右扫风</text>
         </view>
-        <image class="icon" src="../../images/sweep_lr.png"></image>
+        <image class="icon" src="../../images/{{status? '':'blackIcon/'}}swing_lr{{lr}}.png"></image>
       </view>
-      <view class="cell">
-        <view class="txt">
+      <view class="cell" bindtap="handleSwingUd" data-id="1">
+        <view class="txt" style="color: {{ud&&status?'':'#000'}}">
           <text class="g-txt">上下扫风</text>
         </view>
-        <image class="icon" src="../../images/sweep_ud.png"></image>
+        <image class="icon" src="../../images/{{status? '':'blackIcon/'}}swing_ud{{ud}}.png"></image>
       </view>
     </view>
     <!--第三列-->
     <view class="item">
-      <view class="cell">
+      <view class="cell" bindtap="handleDelay">
         <view class="txt">
           <text class="g-txt">倒计时关</text>
           <text class="s-txt">00:01:55</text>
@@ -103,3 +107,5 @@
     <image class="icon" src="../../images/silder_on.png"></image>
   </view>
 </scroll-view>
+
+<delay-box show-box="{{isShowDelayBox}}" bindcloseBox="closeBoxDelayFn"></delay-box>

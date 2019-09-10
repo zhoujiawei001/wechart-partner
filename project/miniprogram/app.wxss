@@ -1,5 +1,7 @@
+@import "weui.wxss";
 page {
   height: 100%;
   width: 100%;
   font-size: 24rpx;
+  box-sizing: border-box;
 }

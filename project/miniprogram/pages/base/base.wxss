@@ -102,8 +102,12 @@
   margin-top: 16rpx;
 }
 .part-3 .icon {
+  position: absolute;
+  top: 50%;
+  right: 24rpx;
   width: 60rpx;
   height: 60rpx;
+  transform: translateY(-50%);
 }
 .part-3 .item {
   display: flex;

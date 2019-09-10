@@ -9,8 +9,17 @@ Page({
     temp: 26,
     minTemp: 16,
     maxTemp: 30,
+    mode: 0, // 0-自动，1-除湿，2-送风，3-制热，4-制冷
+    modes: ['自动', '除湿', '送风', '制热', '制冷'],
+    supportMode: ['自动', '除湿', '制热', '制冷'], // 空调所支持的模式
+    speed: 0, // 0-自动，1-低风，2-中风, 3-高风
+    speeds: ['自动', '低风', '中风', '高风'],
+    supportSpeed: ['低风', '中风', '高风'], // 空调所支持的风速
     isShowModeBox: false, // 控制模式弹出框的变量
     isShowWindBox: false, // 控制风速弹出框变量
+    lr: 0, // 0-左右扫风关, 1-左右扫风开
+    ud: 0, // 0-上下扫风关，1-上下扫风开
+    isShowDelayBox: false, // 控制倒计时弹出框的变量
   },
   /**
    * 空调开关
@@ -77,6 +86,50 @@ Page({
    */
   handleSelectItem: function (e) {
     console.log(e.detail)
+    let $n = e.detail.split('-');
+    console.log($n);
+    if ($n[0] === 'mode') {
+      this.setData({
+        mode: +$n[1]
+      })
+    } else {
+      this.setData({
+        speed: +$n[1]
+      })
+    }
+  },
+  /**
+   *点击上下扫风
+   */
+  handleSwingUd: function (e) {
+    console.log(232)
+    this.setData({
+      ud: +!this.data.ud * 1
+    })
+  },
+  /**
+   *点击左右扫风
+   */
+  handleSwingLr: function (e) {
+    this.setData({
+      lr: +!this.data.lr * 1
+    })
+  },
+  /**
+   * 点击倒计时关
+   */
+  handleDelay: function () {
+    this.setData({
+      isShowDelayBox: true
+    })
+  },
+  /**
+   * 关闭倒计时关弹出框
+   */
+  closeBoxDelayFn: function () {
+    this.setData({
+      isShowDelayBox: false
+    })
   },
   /**
    * 生命周期函数--监听页面加载

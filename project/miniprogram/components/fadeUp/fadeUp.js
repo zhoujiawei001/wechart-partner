@@ -11,6 +11,14 @@ Component({
     propType: {
       type: String,
       value: 'mode'
+    },
+    boxList: {
+      type: Array,
+      value: []
+    },
+    supportList: {
+      type: Array,
+      value: []
     }
   },
 
@@ -19,7 +27,7 @@ Component({
    */
   data: {
     aniStyle: true, //动画效果，默认slideup
-    boxList: ['自动', '除湿', '送风', '制热', '制冷']
+    // boxList: ['自动', '除湿', '送风', '制热', '制冷']
   },
 
   /**

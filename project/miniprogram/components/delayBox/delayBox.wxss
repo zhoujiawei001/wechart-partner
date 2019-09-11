@@ -84,7 +84,3 @@
       bottom: 0;
     }
 }
-.forbiddenBtn {
-  opacity: .3;
-  pointer-events: none;
-}

@@ -15,12 +15,6 @@ App({
       })
     }
 
-    this.globalData = {
-      demain: 'http://demo.yaokantv.com:8214',
-      appId: '',
-      openId: '',
-      signature: '',
-      timeStamp: ''
-    }
+    this.globalData = {}
   }
 })

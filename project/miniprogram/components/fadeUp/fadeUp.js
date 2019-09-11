@@ -44,7 +44,7 @@ Component({
         this.setData({
           aniStyle: true
         })
-      }, 100);
+      }, 300);
     },
     /**
      * 选中选项

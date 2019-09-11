@@ -26,7 +26,7 @@ Component({
   data: {
     hours: hours,
     min: min,
-    value: [0, 0],
+    value: [9999, 1, 1],
     aniStyle: true, //动画效果，默认slideup
   },
 
@@ -36,9 +36,11 @@ Component({
   methods: {
     bindChange: function (e) {
       const val = e.detail.value
-      this.setData({
-        value: val
-      })
+      console.log('vla', val);
+      // this.setData({
+      //   hours: this.data.hours[val[0]],
+      //   min: this.data.min[val[1]]
+      // })
     },
     doNoThing: function (e) {
       // console.log(e);
@@ -55,13 +57,7 @@ Component({
         this.setData({
           aniStyle: true
         })
-      },100);
-    },
-    /**
-     * 确定开启倒计时
-     */
-    sure: function () {
-      this.triggerEvent('openDelay', this.data.value);
+      },300);
     }
   }
 })

@@ -83,13 +83,13 @@
     <!--第三列-->
     <view class="item">
       <view class="cell" bindtap="handleDelay">
-        <view class="txt" style="color: {{delay&&status? '': '#000'}}">
+        <view class="txt">
           <text class="g-txt">倒计时关</text>
-          <text class="s-txt" wx:if="{{delay}}">{{hhmmss}}</text>
+          <text class="s-txt">00:01:55</text>
         </view>
-        <image class="icon" src="../../images/{{status? '':'blackIcon/'}}delay{{delay}}.png"></image>
+        <image class="icon" src="../../images/delay_on.png"></image>
       </view>
-      <view class="cell" bindtap="clickCloseDelay">
+      <view class="cell">
         <view class="txt">
           <text class="g-txt" style="color: #000">关闭倒计时</text>
           <text class="s-txt"></text>
@@ -108,7 +108,4 @@
   </view>
 </scroll-view>
 
-<delay-box 
-  show-box="{{isShowDelayBox}}" 
-  bindcloseBox="closeBoxDelayFn"
-  bindopenDelay="openDelayFn"></delay-box>
+<delay-box show-box="{{isShowDelayBox}}" bindcloseBox="closeBoxDelayFn"></delay-box>

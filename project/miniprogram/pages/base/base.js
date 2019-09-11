@@ -192,7 +192,7 @@ Page({
         'signature': app.globalData.signature,
         'timeStamp': app.globalData.timeStamp
       },
-      success: res => {
+      success: (res) => {
         console.log(res.data.data);
         this.setData({
           devList: res.data.data

@@ -1,4 +1,7 @@
 // pages/base/base.js
+import { changeSelectTime } from '../../utils/index.js'
+import md5 from '../../utils/md5.js'
+const app = getApp();
 Page({
 
   /**
@@ -20,6 +23,12 @@ Page({
     lr: 0, // 0-左右扫风关, 1-左右扫风开
     ud: 0, // 0-上下扫风关，1-上下扫风开
     isShowDelayBox: false, // 控制倒计时弹出框的变量
+    delay: 0, // 0-关闭倒计时，1-开启倒计时
+    hhmmss: '', // 倒计时 00:00:00
+    delayTimer: null, // 倒计时timer
+    devList: [], // 设备列表
+    devDetails: {}, // 设备详情
+    devStatus: {}, // 设备状态
   },
   /**
    * 空调开关
@@ -132,10 +141,148 @@ Page({
     })
   },
   /**
+   * 点击关闭倒计时按钮
+   */
+  clickCloseDelay: function () {
+    clearInterval(this.data.delayTimer);
+    this.setData({
+      delay: 0,
+      delayTimer: null,
+      hhmmss: ''
+    })
+  },
+  /**
+   * 开启定时器
+   */
+  openDelayFn: function (e) {
+    this.clickCloseDelay();
+    const val = e.detail; // 选中的时间
+    let curTimestamp = Date.parse(new Date()); // 当前时间戳
+    let totalTimestamp = val[0] * 3600000 + val[1] * 60000 + curTimestamp;
+    this.setData({
+      hhmmss: changeSelectTime(totalTimestamp)
+    })
+    this.data.delayTimer = setInterval(() => {
+      console.log(234);
+      let $curTimestamp = Date.parse(new Date())
+      this.setData({
+        hhmmss: changeSelectTime(totalTimestamp)
+      })
+      if ($curTimestamp >= totalTimestamp) {
+        this.clickCloseDelay();
+      }
+    }, 1000);
+    setTimeout(() => {
+      this.setData({
+        isShowDelayBox: false,
+        delay: 1
+      })
+    }, 100);
+  },
+  /***************************** 数据类 *****************************/
+  /**
+   * 获取设备列表
+   */
+  getDevList: function () {
+    wx.request({
+      url: app.globalData.demain + '/wap/v1/remotes', //仅为示例，并非真实的接口地址
+      header: {
+        'appId': app.globalData.appId,
+        'openId': app.globalData.openId,
+        'signature': app.globalData.signature,
+        'timeStamp': app.globalData.timeStamp
+      },
+      success: (res) => {
+        console.log(res.data.data);
+        this.setData({
+          devList: res.data.data
+        })
+        this.getDevDetails()
+      },
+      fail(err) {
+        console.log(err)
+      }
+    })
+  },
+  /**
+   * 获取设备详情
+   */
+  getDevDetails: function () {
+    wx.request({
+      url: app.globalData.demain + '/wap/v1/remoteAc',
+      data: {
+        deviceId: this.data.devList[0].deviceId
+      },
+      header: {
+        'appId': app.globalData.appId,
+        'openId': app.globalData.openId,
+        'signature': app.globalData.signature,
+        'timeStamp': app.globalData.timeStamp
+      },
+      success: res => {
+        console.log(res.data.data);
+        this.setData({
+          devDetails: res.data.data.functions,
+          devStatus: res.data.data.state
+        })
+      },
+      fail: err => {
+        console.log(err);
+      }
+    })
+  },
+  /**
+   * 发送信息给设备
+   */
+  sendDataToDev: function () {
+    wx.request({
+      method: 'POST',
+      url: app.globalData.demain + '/wap/v1/c=ctrlAc',
+      data: {
+        deviceId: this.data.devList[0].deviceId,
+        mode: 1,
+        speed: 0,
+        temp: 26,
+        windUd: 1,
+        windLr: 1,
+        power: 1
+      },
+      header: {
+        'content-Type': 'application/x-www-form-urlencoded',
+        'appId': app.globalData.appId,
+        'openId': app.globalData.openId,
+        'signature': app.globalData.signature,
+        'timeStamp': app.globalData.timeStamp
+      },
+      success: res => {
+        console.log(res);
+      },
+      fail: err => {
+        console.log(err);
+      }
+    })
+  },
+  /**
    * 生命周期函数--监听页面加载
    */
   onLoad: function (options) {
-
+    wx.cloud.callFunction({
+      name: 'login'
+    }).then(res => {
+      console.log(res);
+      let signStr = '94d3b83bd9f00589acac31520664993e' + Date.parse(new Date()) / 1000;
+      let $B = md5(signStr);
+      let sign = $B.slice(1, 2) + $B.slice(3, 4) + $B.slice(7, 8) + $B.slice(15, 16) + $B.slice(31, 32);
+      app.globalData.appId = '94d3b83bd9f00589acac31520664993e';
+      app.globalData.openId = res.result.openid;
+      app.globalData.signature = sign;
+      app.globalData.timeStamp = Date.parse(new Date()) / 1000;
+      console.log('app', app.globalData);
+      this.getDevList();
+      // this.getDevDetails();
+    }).catch(err => {
+      console.log(err);
+    })
   },
 
   /**

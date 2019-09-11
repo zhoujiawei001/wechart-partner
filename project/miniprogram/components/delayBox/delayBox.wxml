@@ -24,7 +24,7 @@
     <view class="btns">
       <view class="lf" bindtap="cancel">取消</view>
       <view class="md"></view>
-      <view class="rt">确定</view>
+      <view class="rt {{value[0] + value[1] !== 0? '':'forbiddenBtn'}}" bindtap="sure">确定</view>
     </view>
   </view>
   <view class="mask" catchtouchmove="doNoThing"></view>

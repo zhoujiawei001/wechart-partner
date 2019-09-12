@@ -8,53 +8,59 @@ Page({
    * 页面的初始数据
    */
   data: {
-    status: 1, // 0-关，1-开
-    temp: 26,
     minTemp: 16,
     maxTemp: 30,
-    mode: 0, // 0-自动，1-除湿，2-送风，3-制热，4-制冷
     modes: ['自动', '除湿', '送风', '制热', '制冷'],
     supportMode: ['自动', '除湿', '制热', '制冷'], // 空调所支持的模式
-    speed: 0, // 0-自动，1-低风，2-中风, 3-高风
     speeds: ['自动', '低风', '中风', '高风'],
     supportSpeed: ['低风', '中风', '高风'], // 空调所支持的风速
     isShowModeBox: false, // 控制模式弹出框的变量
     isShowWindBox: false, // 控制风速弹出框变量
-    lr: 0, // 0-左右扫风关, 1-左右扫风开
-    ud: 0, // 0-上下扫风关，1-上下扫风开
     isShowDelayBox: false, // 控制倒计时弹出框的变量
     delay: 0, // 0-关闭倒计时，1-开启倒计时
     hhmmss: '', // 倒计时 00:00:00
     delayTimer: null, // 倒计时timer
     devList: [], // 设备列表
+    deviceId: '', // 设备ID
     devDetails: {}, // 设备详情
-    devStatus: {}, // 设备状态
+    devStatus: {
+      power: 1,
+      temp: 26,
+      mode: 0, // 0-自动，1-除湿，2-送风，3-制热，4-制冷
+      speed: 0, // 0-自动，1-低风，2-中风, 3-高风
+      windLr: 0, // 0-不支持, 1-左右扫风开，2-关
+      windUd: 1 // 0-不支持, 1-上下扫风开，2-关
+    }, // 设备状态
   },
   /**
    * 空调开关
    */
   switchFn: function () {
     this.setData({
-      status: !this.data.status
+      ['devStatus.power']: +!this.data.devStatus.power
     })
+    let params = {
+      deviceId: this.data.deviceId,
+      ...this.data.devStatus
+    }
+    this.sendDataToDev(params);
   },
   /**
    * 调整温度
    */
   adjustTemp: function (options) {
-    console.log(options.target.dataset.id);
     let $id = options.target.dataset.id;
     if (+$id) {
-      if (this.data.temp >= this.data.maxTemp) return
-      let $temp = this.data.temp + 1;
+      if (this.data.devStatus.temp >= this.data.maxTemp) return
+      let $temp = this.data.devStatus.temp + 1;
       this.setData({
-        temp: $temp
+        ['devStatus.temp']: $temp
       })
     } else {
-      if (this.data.temp <= this.data.minTemp) return
-      let $temp = this.data.temp - 1;
+      if (this.data.devStatus.temp <= this.data.minTemp) return
+      let $temp = this.data.devStatus.temp - 1;
       this.setData({
-        temp: $temp
+        ['devStatus.temp']: $temp
       })
     }
   },
@@ -99,11 +105,11 @@ Page({
     console.log($n);
     if ($n[0] === 'mode') {
       this.setData({
-        mode: +$n[1]
+        ['devStatus.mode']: +$n[1]
       })
     } else {
       this.setData({
-        speed: +$n[1]
+        ['devStatus.speed']: +$n[1]
       })
     }
   },
@@ -113,7 +119,7 @@ Page({
   handleSwingUd: function (e) {
     console.log(232)
     this.setData({
-      ud: +!this.data.ud * 1
+      ['devStatus.windUd']: this.data.devStatus.windUd === 1? 2:1
     })
   },
   /**
@@ -121,7 +127,7 @@ Page({
    */
   handleSwingLr: function (e) {
     this.setData({
-      lr: +!this.data.lr * 1
+      ['devStatus.windLr']: this.data.devStatus.windLr === 1? 2:1
     })
   },
   /**
@@ -193,11 +199,15 @@ Page({
         'timeStamp': app.globalData.timeStamp
       },
       success: (res) => {
-        console.log(res.data.data);
-        this.setData({
-          devList: res.data.data
-        })
-        this.getDevDetails()
+        console.log('getDevList_res', res.data.errorCode);
+        let code = res.data.errorCode;
+        if (code === 0) {
+          this.setData({
+            devList: res.data.data,
+            deviceId: res.data.data[0].deviceId
+          })
+          this.getDevDetails()
+        }
       },
       fail: err => {
         console.log(err)
@@ -220,11 +230,14 @@ Page({
         'timeStamp': app.globalData.timeStamp
       },
       success: res => {
-        console.log(res.data.data);
-        this.setData({
-          devDetails: res.data.data.functions,
-          devStatus: res.data.data.state
-        })
+        console.log('getDevDetails_code', res.data.errorCode);
+        let code = res.data.errorCode;
+        if (code === 0) {
+          this.setData({
+            devDetails: res.data.data.functions,
+            devStatus: res.data.data.state
+          })
+        }
       },
       fail: err => {
         console.log(err);
@@ -234,28 +247,23 @@ Page({
   /**
    * 发送信息给设备
    */
-  sendDataToDev: function () {
+  sendDataToDev: function (params) {
+    console.log('sendBody', params);
+    let signStr = '94d3b83bd9f00589acac31520664993e' + Date.parse(new Date()) / 1000;
+    let $B = md5(signStr);
+    let sign = $B.slice(1, 2) + $B.slice(3, 4) + $B.slice(7, 8) + $B.slice(15, 16) + $B.slice(31, 32);
     wx.request({
       method: 'POST',
-      url: app.globalData.demain + '/wap/v1/c=ctrlAc',
-      data: {
-        deviceId: this.data.devList[0].deviceId,
-        mode: 1,
-        speed: 0,
-        temp: 26,
-        windUd: 1,
-        windLr: 1,
-        power: 1
-      },
+      url: app.globalData.demain + '/wap/v1/ctrlAc',
+      data: params,
       header: {
-        'content-Type': 'application/x-www-form-urlencoded',
         'appId': app.globalData.appId,
         'openId': app.globalData.openId,
-        'signature': app.globalData.signature,
-        'timeStamp': app.globalData.timeStamp
+        'signature': sign,
+        'timeStamp': Date.parse(new Date()) / 1000
       },
       success: res => {
-        console.log(res);
+        console.log('sendBody_code', res.data.errorCode);
       },
       fail: err => {
         console.log(err);
@@ -279,7 +287,6 @@ Page({
       app.globalData.timeStamp = Date.parse(new Date()) / 1000;
       console.log('app', app.globalData);
       this.getDevList();
-      // this.getDevDetails();
     }).catch(err => {
       console.log(err);
     })

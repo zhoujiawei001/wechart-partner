@@ -1,4 +1,5 @@
 //app.js
+import md5 from './utils/md5.js'
 App({
   onLaunch: function () {
     
@@ -20,7 +21,24 @@ App({
       appId: '',
       openId: '',
       signature: '',
-      timeStamp: ''
+      timeStamp: '',
+      delayOn: {},
+      deviceId: ''
+    }
+
+    /**
+   * 通过md5处理获取sign
+   */
+    this.getSign = val => {
+      let $timestamp = Date.parse(new Date()) / 1000;
+      let signStr = '94d3b83bd9f00589acac31520664993e' + $timestamp;
+      let $B = md5(signStr);
+      let sign = $B.slice(1, 2) + $B.slice(3, 4) + $B.slice(7, 8) + $B.slice(15, 16) + $B.slice(31, 32);
+      if (val) {
+        return sign;
+      } else {
+        return $timestamp;
+      }
     }
   }
 })

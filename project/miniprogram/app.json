@@ -9,9 +9,7 @@
     "backgroundTextStyle": "dark",
     "navigationBarBackgroundColor": "#E1E1E1",
     "navigationBarTitleText": "空调伴侣",
-    "navigationBarTextStyle": "black",
-    "backgroundColorTop": "#e1e1e1",
-    "backgroundColorBottom": "#F2F2F2"
+    "navigationBarTextStyle": "black"
   },
   "sitemapLocation": "sitemap.json"
 }

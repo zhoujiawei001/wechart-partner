@@ -18,7 +18,7 @@
   box-sizing: border-box;
 }
 .time .active {
-  border: 1rpx solid #007dff;
+  border: 1px solid #007dff;
 }
 .days{
   margin-top: 24rpx;

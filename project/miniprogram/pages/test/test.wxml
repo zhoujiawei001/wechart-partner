@@ -1,0 +1,7 @@
+<!-- 进入测试 -->
+<view class="test">
+  <view class="test_content">
+    <input class="c_input" bindinput="getValue" placeholder="请输入mac地址" auto-focus/>
+    <button type="primary" bindtap="goToBase">进入测试4</button>
+  </view>
+</view>

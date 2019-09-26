@@ -79,6 +79,16 @@
   box-sizing: border-box;
   border-right: 1rpx solid #ddd;
 }
+.pt1-rt .txt {
+  position: relative;
+}
+.pt1-rt .arrow {
+  position: absolute;
+  top: -2rpx;
+  right: -36rpx;
+  width: 42rpx;
+  height: 42rpx;
+}
 /** 第二部分（温度） **/
 .part-2 {
   margin-top: 16rpx;

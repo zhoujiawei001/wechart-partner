@@ -1,5 +1,5 @@
 // pages/base/base.js
-import { changeSelectTime } from '../../utils/index.js'
+import { changeSelectTime, add_zero } from '../../utils/index.js'
 import md5 from '../../utils/md5.js'
 const app = getApp();
 Page({
@@ -8,12 +8,17 @@ Page({
    * 页面的初始数据
    */
   data: {
+    support: { // 各个模式下所支持的空调功能
+      speed: [0,1,2,3],
+      temperature: [],
+      windUd: 1,
+      windLr: 1
+    },
+    supportMode: [0,1,2,3,4], // 空调所支持的模式
     minTemp: 16,
     maxTemp: 30,
     modes: ['自动', '除湿', '送风', '制热', '制冷'],
-    supportMode: ['自动', '除湿', '制热', '制冷'], // 空调所支持的模式
     speeds: ['自动', '低风', '中风', '高风'],
-    supportSpeed: ['低风', '中风', '高风'], // 空调所支持的风速
     isShowModeBox: false, // 控制模式弹出框的变量
     isShowWindBox: false, // 控制风速弹出框变量
     isShowDelayBox: false, // 控制倒计时弹出框的变量
@@ -28,7 +33,8 @@ Page({
       mode: 0, // 0-自动，1-除湿，2-送风，3-制热，4-制冷
       speed: 0, // 0-自动，1-低风，2-中风, 3-高风
       windLr: 1, // 0-不支持, 1-左右扫风开，2-关
-      windUd: 1 // 0-不支持, 1-上下扫风开，2-关
+      windUd: 1, // 0-不支持, 1-上下扫风开，2-关
+      independentWind: 0 // 0-非独立扫风，1-独立扫风
     }, // 设备状态
     delayOff: {
       id: 5,
@@ -46,24 +52,48 @@ Page({
       state: 0,
       repeatDay: ''
     }, // 定时开，开多久关闭
+    showDelayOn: {
+      p_time: '',
+      l_time: '',
+      date: ''
+    },
+    curPower: 0, // 当前功能
+    curPowerTimer: null, // 当前功能定时获取任务
+    todayPower: 0, // 今日用电量
+    todayPowerTimer: null, // 今日电量定时任务
+    clickTag: 0, // 防止频繁点击
   },
   /**
    * 空调开关
    */
   switchFn: function () {
-    this.setData({
-      ['devStatus.power']: +!this.data.devStatus.power
-    })
-    let params = {
-      deviceId: this.data.deviceId,
-      ...this.data.devStatus
+    if (this.data.clickTag === 0) {
+      this.setData({
+        clickTag: 1
+      })
+      setTimeout(() => {
+        this.setData({
+          clickTag: 0,
+          ['devStatus.power']: +!this.data.devStatus.power
+        })
+        let params = {
+          deviceId: this.data.deviceId,
+          ...this.data.devStatus
+        }
+        this.sendDataToDev(params);
+      }, 500);
+    } else {
+      wx.showToast({
+        title: '请勿频繁点击',
+        image: '../../images/warn.png'
+      })
     }
-    this.sendDataToDev(params);
   },
   /**
    * 调整温度
    */
   adjustTemp: function (options) {
+    if (this.data.support.temperature.length === 0) return;
     let $id = options.target.dataset.id;
     if (+$id) {
       if (this.data.devStatus.temp >= this.data.maxTemp) return
@@ -120,13 +150,25 @@ Page({
    * 获取选中的条目
    */
   handleSelectItem: function (e) {
-    console.log(e.detail)
     let $n = e.detail.split('-');
-    console.log($n);
+    let $attr = this.data.devDetails.attributes[$n[1]]
     if ($n[0] === 'mode') {
       this.setData({
-        ['devStatus.mode']: +$n[1]
+        ['devStatus.mode']: +$n[1],
+        ['devStatus.speed']: $attr.speed[0],
+        support: $attr
       })
+      if ($attr.temperature.length === 0) {
+        this.setData({
+          ['devStatus.temp']: 0
+        })
+      } else {
+        this.setData({
+          minTemp: $attr.temperature[0],
+          maxTemp: $attr.temperature[$attr.temperature.length - 1],
+          ['devStatus.temp']: 26
+        })
+      }
     } else {
       this.setData({
         ['devStatus.speed']: +$n[1]
@@ -142,9 +184,8 @@ Page({
    *点击上下扫风
    */
   handleSwingUd: function (e) {
-    console.log(232)
     this.setData({
-      ['devStatus.windUd']: this.data.devStatus.windUd === 1? 2:1
+      ['devStatus.windUd']: this.data.devStatus.windUd === 1 ? 2 : 1
     })
     let params = {
       deviceId: this.data.deviceId,
@@ -157,7 +198,7 @@ Page({
    */
   handleSwingLr: function (e) {
     this.setData({
-      ['devStatus.windLr']: this.data.devStatus.windLr === 1? 2:1
+      ['devStatus.windLr']: this.data.devStatus.windLr === 1 ? 2 : 1
     })
     let params = {
       deviceId: this.data.deviceId,
@@ -202,7 +243,7 @@ Page({
   editDelay: function (runtime) {
     wx.request({
       method: 'POST',
-      url: app.globalData.demain + '/wap/v1/timerEdit',
+      url: app.globalData.domain + '/wap/v1/timerEdit',
       data: {
         id: this.data.delayOff.id,
         runtime: runtime,
@@ -212,7 +253,7 @@ Page({
       },
       header: {
         'appId': app.globalData.appId,
-        'token': app.globalData.openId,
+        'token': app.globalData.token,
         'signature': app.getSign(1),
         'timeStamp': app.getSign(0)
       },
@@ -236,7 +277,7 @@ Page({
   createDelay: function (runtime) {
     wx.request({
       method: 'POST',
-      url: app.globalData.demain + '/wap/v1/timerAdd',
+      url: app.globalData.domain + '/wap/v1/timerAdd',
       data: {
         deviceId: this.data.deviceId,
         type: 2,
@@ -246,7 +287,7 @@ Page({
       },
       header: {
         'appId': app.globalData.appId,
-        'token': app.globalData.openId,
+        'token': app.globalData.token,
         'signature': app.getSign(1),
         'timeStamp': app.getSign(0)
       },
@@ -278,7 +319,6 @@ Page({
         hhmmss: changeSelectTime(totalTimestamp)
       })
       this.data.delayTimer = setInterval(() => {
-        console.log(345);
         let $curTimestamp = Date.parse(new Date());
         this.setData({
           hhmmss: changeSelectTime(totalTimestamp)
@@ -306,7 +346,7 @@ Page({
   closeDelayOff: function () {
     wx.request({
       method: 'POST',
-      url: app.globalData.demain + '/wap/v1/timerEdit',
+      url: app.globalData.domain + '/wap/v1/timerEdit',
       data: {
         id: this.data.delayOff.id,
         runtime: 0,
@@ -316,7 +356,7 @@ Page({
       },
       header: {
         'appId': app.globalData.appId,
-        'token': app.globalData.openId,
+        'token': app.globalData.token,
         'signature': app.getSign(1),
         'timeStamp': app.getSign(0)
       },
@@ -331,32 +371,105 @@ Page({
       }
     })
   },
+  /**
+   * 定时开关
+   */
+  switchDelayOn: function () {
+    let $delayOn = app.globalData.delayOn
+    if ($delayOn.id) {
+      wx.request({
+        method: 'POST',
+        url: app.globalData.domain + '/wap/v1/timerEdit',
+        data: {
+          id: $delayOn.id,
+          runtime: $delayOn.runtime,
+          lifetime: $delayOn.lifetime,
+          repeatDay: $delayOn.repeatDay,
+          state: +!$delayOn.state
+        },
+        header: {
+          'appId': app.globalData.appId,
+          'token': app.globalData.token,
+          'signature': app.getSign(1),
+          'timeStamp': app.getSign(0)
+        },
+        success: res => {
+          console.log('editDelayOn', res.data.errorCode);
+          if (res.data.errorCode === 0) {
+            this.getDevDetails();
+          }
+          setTimeout(() => {
+            this.setData({
+              isShowDelayBox: false
+            })
+          }, 100)
+        },
+        fail: err => {
+          console.log(err);
+        }
+      })
+    } else {
+      this.toastFn('请设置参数');
+    }
+  },
+  // 定时开关时间
+  delayOnTime: function (timestamp) {
+    let date = new Date(timestamp)
+    let hh = date.getHours();
+    let mm = date.getMinutes();
+    return `${add_zero(hh)}:${add_zero(mm)}`;
+  },
+  // 定时开机多久
+  delayOnLong: function (lifeTime) {
+    let num = lifeTime / 60
+    return num?`开机${num}小时`: '一直开机'
+  },
+  // 重复日子
+  delayOnRepeatDay: function (repeatDay) {
+    if (repeatDay === '') {
+      return '执行一次';
+    } else if (repeatDay === '1,2,3,4,5') {
+      return '工作日重复';
+    } else if (repeatDay === '6,7') {
+      return '周末重复';
+    } else {
+      return '每天重复'
+    }
+  },
   /***************************** 数据类 *****************************/
   /**
    * 获取设备列表
    */
   getDevList: function () {
     wx.request({
-      url: app.globalData.demain + '/wap/v1/remotes', //仅为示例，并非真实的接口地址
+      url: app.globalData.domain + '/wap/v1/remotes', //仅为示例，并非真实的接口地址
       header: {
         'appId': app.globalData.appId,
-        'token': app.globalData.openId,
+        'token': app.globalData.token,
         'signature': app.getSign(1),
         'timeStamp': app.getSign(0)
       },
       data: {
-        macs: 'DC4F22529F13'
+        macs: app.globalData.macs
       },
       success: (res) => {
-        console.log('getDevList_res', res.data.errorCode);
+        console.log('getDevList_code', res.data.errorCode);
+        console.log('getDevList_data', res.data.data);
         let code = res.data.errorCode;
         if (code === 0) {
-          this.setData({
-            devList: res.data.data,
-            deviceId: res.data.data[0].deviceId
-          })
-          app.globalData.deviceId = res.data.data[0].deviceId;
-          this.getDevDetails()
+          if (res.data.data.length > 0) {
+            this.setData({
+              devList: res.data.data,
+              deviceId: res.data.data[0].deviceId
+            })
+            app.globalData.deviceId = res.data.data[0].deviceId;
+            this.getDevDetails()
+          } else {
+            wx.showToast({
+              title: '请添加设备',
+              image: '../../images/warn.png'
+            })
+          }
         }
       },
       fail: err => {
@@ -369,18 +482,19 @@ Page({
    */
   getDevDetails: function () {
     wx.request({
-      url: app.globalData.demain + '/wap/v1/remoteAc',
+      url: app.globalData.domain + '/wap/v1/remoteAc',
       data: {
         deviceId: this.data.devList[0].deviceId
       },
       header: {
         'appId': app.globalData.appId,
-        'token': app.globalData.openId,
+        'token': app.globalData.token,
         'signature': app.getSign(1),
         'timeStamp': app.getSign(0)
       },
       success: res => {
         console.log('getDevDetails_code', res.data.errorCode);
+        console.log('getDevDetails_data', res.data.data);
         let code = res.data.errorCode;
         let $res = res.data.data;
         if (code === 0) {
@@ -388,10 +502,22 @@ Page({
             devDetails: $res.functions,
             devStatus: $res.state,
             delayOn: $res.timers.filter(item => item.type === 1)[0],
-            delayOff: $res.timers.filter(item => item.type === 2)[0]
+            delayOff: $res.timers.filter(item => item.type === 2)[0],
+            supportMode: $res.functions.mode,
+            support: $res.functions.attributes[$res.state.mode]
           })
           app.globalData.delayOn = $res.timers.filter(item => item.type === 1)[0];
-          console.log('$res.timer', $res.timers.filter(item => item.type === 2)[0].state);
+          this.setData({
+            ['showDelayOn.p_time']: this.delayOnTime($res.timers.filter(item => item.type === 1)[0].runtime * 1000),
+            ['showDelayOn.l_time']: this.delayOnLong($res.timers.filter(item => item.type === 1)[0].lifetime),
+            ['showDelayOn.date']: this.delayOnRepeatDay($res.timers.filter(item => item.type === 1)[0].repeatDay)
+          })
+          // 判断扫风0-不支持独立,1-支持独立
+          this.setData({
+            ['devStatus.independentWind']: $res.functions.independentWind,
+            ['devStatus.windLr']: $res.functions.attributes[$res.state.mode].windLr? $res.state.windLr : 0,
+            ['devStatus.windUd']: $res.functions.attributes[$res.state.mode].windUd? $res.state.windUd : 0
+          })
           this.judgeDelayIsOpen(this.data.delayOff);
         }
       },
@@ -400,6 +526,26 @@ Page({
       }
     })
   },
+  // 判断扫风公共方法
+  windPub: function (val, param) {
+    switch (val) {
+      case 0:
+        this.setData({
+          ['devStatus.windUd']: 0
+        });
+        break
+      case 1:
+        this.setData({
+          ['devStatus.windUd']: 1
+        });
+        break
+      default:
+        this.setData({
+          ['devStatus.windUd']: 3
+        })
+        break
+    }
+  },
   /**
    * 发送信息给设备
    */
@@ -407,16 +553,22 @@ Page({
     console.log('sendBody', params);
     wx.request({
       method: 'POST',
-      url: app.globalData.demain + '/wap/v1/ctrlAc',
+      url: app.globalData.domain + '/wap/v1/ctrlAc',
       data: params,
       header: {
         'appId': app.globalData.appId,
-        'token': app.globalData.openId,
+        'token': app.globalData.token,
         'signature': app.getSign(1),
         'timeStamp': app.getSign(0)
       },
       success: res => {
         console.log('sendBody_code', res.data.errorCode);
+        let $code = res.data.errorCode;
+        if ($code === 100001) {
+          this.toastFn('请添加设备');
+        } else if ($code === 100201) {
+          this.toastFn('设备没有或离线');
+        }
       },
       fail: err => {
         console.log(err);
@@ -424,33 +576,99 @@ Page({
     })
   },
   /**
-   * 通过md5处理获取sign
+   * 获取当前功能
    */
-  // getSign: function (val) {
-  //   let $timestamp = Date.parse(new Date()) / 1000;
-  //   let signStr = '94d3b83bd9f00589acac31520664993e' + $timestamp;
-  //   let $B = md5(signStr);
-  //   let sign = $B.slice(1, 2) + $B.slice(3, 4) + $B.slice(7, 8) + $B.slice(15, 16) + $B.slice(31, 32);
-  //   if (val) {
-  //     return sign;
-  //   } else {
-  //     return $timestamp;
-  //   }
-  // },
+  getCurPower: function () {
+    this.getCurPowerRq();
+  },
+  // 获取当前功率request部分
+  getCurPowerRq: function () {
+    wx.request({
+      url: app.globalData.domain + '/wap/v1/power',
+      data: {
+        mac: app.globalData.macs
+      },
+      header: {
+        'appId': app.globalData.appId,
+        'token': app.globalData.token,
+        'signature': app.getSign(1),
+        'timeStamp': app.getSign(0)
+      },
+      success: res => {
+        // console.log('geCurPower_code', res.data.errorCode);
+        // console.log('getCurPower_data', res.data.data.value);
+        let $code = res.data.errorCode;
+        let $data = res.data.data;
+        let $val = res.data.data.value;
+        if ($code === 0) {
+          this.setData({
+            curPower: $val.substring(0, $val.length - 2)
+          })
+        }
+      },
+      fail: err => {
+        console.log('fail', err);
+      }
+    })
+  },
   /**
-   * 生命周期函数--监听页面加载
+   * 获取今日电量
    */
+  getTodayBattery: function () {
+    this.getTodayBatteryRq();
+  },
+  // 获取今日电量的request部分
+  getTodayBatteryRq: function () {
+    wx.request({
+      url: app.globalData.domain + '/wap/v1/powerDay',
+      data: {
+        mac: app.globalData.macs
+      },
+      header: {
+        'appId': app.globalData.appId,
+        'token': app.globalData.token,
+        'signature': app.getSign(1),
+        'timeStamp': app.getSign(0)
+      },
+      success: res => {
+        // console.log('getTodayBatteryRq_code', res.data.errorCode);
+        // console.log('getTodayBatteryRq_data', res.data.data.value);
+        let $code = res.data.errorCode;
+        let $data = res.data.data;
+        let $val = res.data.data.value;
+        if ($code === 0) {
+          this.setData({
+            todayPower: $val.substring(0, $val.length - 2)
+          })
+        }
+      },
+      fail: err => {
+        console.log('fail', err);
+      }
+    })
+  },
+  // 点击今日用电量区域
+  clickTodayUse: function () {
+    wx.navigateTo({
+      url: '../chart/chart',
+    })
+  },
+  /**
+   * toast
+   */
+  toastFn: function (txt) {
+    wx.showToast({
+      title: txt,
+      image: '../../images/warn.png'
+    })
+  },
   onLoad: function (options) {
     wx.cloud.callFunction({
       name: 'login'
     }).then(res => {
-      console.log(res);
-      app.globalData.appId = '94d3b83bd9f00589acac31520664993e';
-      app.globalData.openId = res.result.openid;
-      app.globalData.signature = app.getSign(1);
-      app.globalData.timeStamp = app.getSign(0);
-      console.log('app', app.globalData);
       this.getDevList();
+      this.getCurPower();
+      this.getTodayBattery();
     }).catch(err => {
       console.log(err);
     })
@@ -467,14 +685,19 @@ Page({
    * 生命周期函数--监听页面初次渲染完成
    */
   onReady: function () {
-
   },
 
   /**
    * 生命周期函数--监听页面显示
    */
   onShow: function () {
-
+    let $delayOn = app.globalData.delayOn;
+    this.setData({
+      ['showDelayOn.p_time']: this.delayOnTime($delayOn.runtime * 1000),
+      ['showDelayOn.l_time']: this.delayOnLong($delayOn.lifetime),
+      ['showDelayOn.date']: this.delayOnRepeatDay($delayOn.repeatDay),
+      delayOn: $delayOn
+    })
   },
 
   /**

@@ -105,11 +105,11 @@ Page({
     console.log(params, val2);
     wx.request({
       method: 'POST',
-      url: `${app.globalData.demain}/wap/v1/${val2?'timerEdit':'timerAdd'}`,
+      url: `${app.globalData.domain}/wap/v1/${val2?'timerEdit':'timerAdd'}`,
       data: params,
       header: {
         'appId': app.globalData.appId,
-        'token': app.globalData.openId,
+        'token': app.globalData.token,
         'signature': app.getSign(1),
         'timeStamp': app.getSign(0)
       },
@@ -132,7 +132,7 @@ Page({
   // 计算绝对时间
   calcTime: function (val) {
     let date = new Date();
-    let yyMMDD = `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`
+    let yyMMDD = `${date.getFullYear()}/${date.getMonth() + 1}/${date.getDate()}`
     let curTimestamp = Date.parse(new Date(yyMMDD)); // 当天凌晨零点时间戳
     let totalTimestamp = val[0] * 3600000 + val[1] * 60000 + curTimestamp; // 将来要执行的绝对时间
     return totalTimestamp / 1000;
@@ -142,18 +142,19 @@ Page({
    */
   getDevDetails: function () {
     wx.request({
-      url: app.globalData.demain + '/wap/v1/remoteAc',
+      url: app.globalData.domain + '/wap/v1/remoteAc',
       data: {
         deviceId: app.globalData.deviceId
       },
       header: {
         'appId': app.globalData.appId,
-        'token': app.globalData.openId,
+        'token': app.globalData.token,
         'signature': app.getSign(1),
         'timeStamp': app.getSign(0)
       },
       success: res => {
         console.log('getDevDetails_code', res.data.errorCode);
+        console.log('getDevDetails_data', res.data.data);
         let code = res.data.errorCode;
         let $res = res.data.data;
         if (code === 0) {

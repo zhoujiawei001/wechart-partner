@@ -1,12 +1,12 @@
 <view class="banner">
-  <text class="txt">{{devStatus.temp}}°c</text>
+  <text class="txt">{{devStatus.temp == 0?'--':devStatus.temp}}°c</text>
 </view>
 
 <scroll-view class="container" scroll-y="{{true}}">
   <!-- 状态一栏 -->
   <view class="statusBar {{devStatus.power?'active_1': ''}}">
     <view class="bar-lf">
-      <view class="online">已开启</view>
+      <view class="online">{{devStatus.power?'已开启':'已关闭'}}</view>
       <view class="name">大金空调</view>
     </view>
     <image class="bar-rt" bindtap="switchFn" src="../../images/switch.png"></image>
@@ -15,22 +15,22 @@
   <view class="part-1">
     <view class="pt1-lf">
       <view>
-        <text class="num">0</text>瓦
+        <text class="num">{{curPower}}</text>瓦
       </view>
       <view class="txt">当前功率</view>
     </view>
-    <view class="pt1-rt">
+    <view class="pt1-rt" bindtap="clickTodayUse">
       <view>
-        <text class="num">0</text>度
+        <text class="num">{{todayPower}}</text>度
       </view>
-      <view class="txt">今日用电量</view>
+      <view class="txt">今日用电量 <image class="arrow" src="../../images/arrow_right2.png"></image></view>
     </view>
   </view>
   <!-- 第二部分（温度） -->
   <view class="part-2 {{devStatus.power?'': 'banned_click'}}">
-    <image class="pt2-lf" bindtap="adjustTemp" data-id="0" src="../../images/reduce.png"></image>
-    <text class="pt2-md">温度</text>
-    <image class="pt2-rt" bindtap="adjustTemp" data-id="1" src="../../images/plus.png"></image>
+    <image class="pt2-lf" bindtap="adjustTemp" data-id="0" src="../../images/{{devStatus.power? '':'blackIcon/'}}reduce.png"></image>
+    <text class="pt2-md" style="color: {{devStatus.power? '': '#000'}}">温度</text>
+    <image class="pt2-rt" bindtap="adjustTemp" data-id="1" src="../../images/{{devStatus.power? '':'blackIcon/'}}plus.png"></image>
   </view>
   <!-- 第三部分（状态） -->
   <view class="part-3 {{devStatus.power?'': 'banned_click'}}">
@@ -43,7 +43,7 @@
         </view>
         <image class="icon" src="../../images/{{devStatus.power? '':'blackIcon/'}}mode{{devStatus.mode}}.png"></image>
         <fade-up 
-          box-show="{{isShowModeBox}}" 
+          wx:if="{{isShowModeBox}}"
           prop-type="mode"
           box-list="{{modes}}"
           support-list="{{supportMode}}"
@@ -57,10 +57,10 @@
         </view>
         <image class="icon" src="../../images/{{devStatus.power? '':'blackIcon/'}}speed{{devStatus.speed}}.png"></image>
         <fade-up 
-          box-show="{{isShowWindBox}}" 
+          wx:if="{{isShowWindBox}}"
           prop-type="speed"
           box-list="{{speeds}}"
-          support-list="{{supportSpeed}}"
+          support-list="{{support.speed}}"
           bindclosebox="closeBoxWindFn"
           bindselectedItem="handleSelectItem"></fade-up>
       </view>
@@ -84,7 +84,7 @@
     <view class="item">
       <view class="cell" bindtap="handleDelay">
         <view class="txt" style="color: {{delayOff.state&&devStatus.power? '': '#000'}}">
-          <text class="g-txt">倒计时关</text>
+          <text class="g-txt">倒计时关机</text>
           <text class="s-txt" wx:if="{{delayOff.state}}">{{hhmmss}}</text>
         </view>
         <image class="icon" src="../../images/{{devStatus.power? '':'blackIcon/'}}delay{{delayOff.state}}.png"></image>
@@ -98,13 +98,13 @@
       </view>
     </view>
   </view>
-  <!-- 第四部分（定时） -->
+  <!-- 第四部分（定时开） -->
   <view class="part-4 {{devStatus.power?'': 'banned_click'}}" bindtap="goToTimer">
-    <view class="txt">
+    <view class="txt" style="color: {{delayOn.state&&devStatus.power? '': '#000'}}">
       <text class="g-txt">定时开关</text>
-      <text class="s-txt">08:30打开空调，开机1:00，工作日重复</text>
+      <text class="s-txt" wx:if="{{delayOn.state}}">{{showDelayOn.p_time}}打开空调，{{showDelayOn.l_time}}，{{showDelayOn.date}}</text>
     </view>
-    <image class="icon" src="../../images/silder_on.png"></image>
+    <image catchtap="switchDelayOn" class="icon" src="../../images/{{devStatus.power? '':'blackIcon/'}}silder_{{delayOn.state?delayOn.state:0}}.png"></image>
   </view>
 </scroll-view>
 

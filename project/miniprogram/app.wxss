@@ -4,4 +4,5 @@ page {
   width: 100%;
   font-size: 24rpx;
   box-sizing: border-box;
+  position: relative;
 }

@@ -1,13 +1,35 @@
 // components/fadeUp/fadeUp.js
 Component({
   /**
+   * 组件生命周期
+   */
+  lifetimes: {
+    attached: function () {
+      // 在组件实例进入页面节点树时执行
+      let e_arr = []
+      let $arr = this.data.boxList.map((item, index) => {
+        return index;
+      })
+      let s_arr = this.data.supportList;
+      for (let i = 0; i < $arr.length; i++) {
+        if (s_arr.includes(i)) {
+          e_arr.push($arr[i]);
+        } else {
+          e_arr.push('');
+        }
+      }
+      this.setData({
+        modeList: e_arr
+      })
+    },
+    detached: function () {
+      // 在组件实例被从页面节点树移除时执行
+    },
+  },
+  /**
    * 组件的属性列表
    */
   properties: {
-    boxShow: {
-      type: Boolean,
-      value: false
-    },
     propType: {
       type: String,
       value: 'mode'
@@ -27,7 +49,7 @@ Component({
    */
   data: {
     aniStyle: true, //动画效果，默认slideup
-    // boxList: ['自动', '除湿', '送风', '制热', '制冷']
+    modeList: []
   },
 
   /**

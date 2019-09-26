@@ -6,7 +6,7 @@
     "pages/chart/chart"
   ],
   "window": {
-    "backgroundTextStyle": "light",
+    "backgroundTextStyle": "dark",
     "navigationBarBackgroundColor": "#E1E1E1",
     "navigationBarTitleText": "空调伴侣",
     "navigationBarTextStyle": "black",

@@ -8,6 +8,7 @@ Page({
    * 页面的初始数据
    */
   data: {
+    devName: '空调', // 设备名称
     support: { // 各个模式下所支持的空调功能
       speed: [0,1,2,3],
       temperature: [],
@@ -61,33 +62,20 @@ Page({
     curPowerTimer: null, // 当前功能定时获取任务
     todayPower: 0, // 今日用电量
     todayPowerTimer: null, // 今日电量定时任务
-    clickTag: 0, // 防止频繁点击
+    clickTimer: null // 防止频繁点击
   },
   /**
    * 空调开关
    */
   switchFn: function () {
-    if (this.data.clickTag === 0) {
-      this.setData({
-        clickTag: 1
-      })
-      setTimeout(() => {
-        this.setData({
-          clickTag: 0,
-          ['devStatus.power']: +!this.data.devStatus.power
-        })
-        let params = {
-          deviceId: this.data.deviceId,
-          ...this.data.devStatus
-        }
-        this.sendDataToDev(params);
-      }, 500);
-    } else {
-      wx.showToast({
-        title: '请勿频繁点击',
-        image: '../../images/warn.png'
-      })
+    this.setData({
+      ['devStatus.power']: +!this.data.devStatus.power
+    })
+    let params = {
+      deviceId: this.data.deviceId,
+      ...this.data.devStatus
     }
+    this.sendDataToDev(params);
   },
   /**
    * 调整温度
@@ -344,48 +332,20 @@ Page({
    * 关闭倒计时关
    */
   closeDelayOff: function () {
-    wx.request({
-      method: 'POST',
-      url: app.globalData.domain + '/wap/v1/timerEdit',
-      data: {
-        id: this.data.delayOff.id,
-        runtime: 0,
-        lifetime: 0,
-        repeatDay: '',
-        state: 0
-      },
-      header: {
-        'appId': app.globalData.appId,
-        'token': app.globalData.token,
-        'signature': app.getSign(1),
-        'timeStamp': app.getSign(0)
-      },
-      success: res => {
-        console.log('closeDelayOff', res.data.errorCode);
-        if (res.data.errorCode === 0) {
-          this.getDevDetails();
-        }
-      },
-      fail: err => {
-        console.log(err);
-      }
+    clearTimeout(this.data.clickTimer);
+    this.setData({
+      clickTimer: null
     })
-  },
-  /**
-   * 定时开关
-   */
-  switchDelayOn: function () {
-    let $delayOn = app.globalData.delayOn
-    if ($delayOn.id) {
+    this.data.clickTimer = setTimeout(() => {
       wx.request({
         method: 'POST',
         url: app.globalData.domain + '/wap/v1/timerEdit',
         data: {
-          id: $delayOn.id,
-          runtime: $delayOn.runtime,
-          lifetime: $delayOn.lifetime,
-          repeatDay: $delayOn.repeatDay,
-          state: +!$delayOn.state
+          id: this.data.delayOff.id,
+          runtime: 0,
+          lifetime: 0,
+          repeatDay: '',
+          state: 0
         },
         header: {
           'appId': app.globalData.appId,
@@ -394,20 +354,60 @@ Page({
           'timeStamp': app.getSign(0)
         },
         success: res => {
-          console.log('editDelayOn', res.data.errorCode);
+          console.log('closeDelayOff', res.data.errorCode);
           if (res.data.errorCode === 0) {
             this.getDevDetails();
           }
-          setTimeout(() => {
-            this.setData({
-              isShowDelayBox: false
-            })
-          }, 100)
         },
         fail: err => {
           console.log(err);
         }
       })
+    }, 350)
+  },
+  /**
+   * 定时开关
+   */
+  switchDelayOn: function () {
+    let $delayOn = app.globalData.delayOn
+    if ($delayOn.id) {
+      clearTimeout(this.data.clickTimer);
+      this.setData({
+        clickTimer: null
+      })
+      this.data.clickTimer = setTimeout(() => {
+        wx.request({
+          method: 'POST',
+          url: app.globalData.domain + '/wap/v1/timerEdit',
+          data: {
+            id: $delayOn.id,
+            runtime: $delayOn.runtime,
+            lifetime: $delayOn.lifetime,
+            repeatDay: $delayOn.repeatDay,
+            state: +!$delayOn.state
+          },
+          header: {
+            'appId': app.globalData.appId,
+            'token': app.globalData.token,
+            'signature': app.getSign(1),
+            'timeStamp': app.getSign(0)
+          },
+          success: res => {
+            console.log('editDelayOn', res.data.errorCode);
+            if (res.data.errorCode === 0) {
+              this.getDevDetails();
+            }
+            setTimeout(() => {
+              this.setData({
+                isShowDelayBox: false
+              })
+            }, 100)
+          },
+          fail: err => {
+            console.log(err);
+          }
+        })
+      }, 350);
     } else {
       this.toastFn('请设置参数');
     }
@@ -499,6 +499,7 @@ Page({
         let $res = res.data.data;
         if (code === 0) {
           this.setData({
+            devName: $res.name,
             devDetails: $res.functions,
             devStatus: $res.state,
             delayOn: $res.timers.filter(item => item.type === 1)[0],
@@ -550,30 +551,37 @@ Page({
    * 发送信息给设备
    */
   sendDataToDev: function (params) {
-    console.log('sendBody', params);
-    wx.request({
-      method: 'POST',
-      url: app.globalData.domain + '/wap/v1/ctrlAc',
-      data: params,
-      header: {
-        'appId': app.globalData.appId,
-        'token': app.globalData.token,
-        'signature': app.getSign(1),
-        'timeStamp': app.getSign(0)
-      },
-      success: res => {
-        console.log('sendBody_code', res.data.errorCode);
-        let $code = res.data.errorCode;
-        if ($code === 100001) {
-          this.toastFn('请添加设备');
-        } else if ($code === 100201) {
-          this.toastFn('设备没有或离线');
-        }
-      },
-      fail: err => {
-        console.log(err);
-      }
+    // 防止频繁点击
+    clearTimeout(this.data.clickTimer);
+    this.setData({
+      clickTimer: null
     })
+    this.data.clickTimer = setTimeout(() => {
+      console.log('sendBody', params);
+      wx.request({
+        method: 'POST',
+        url: app.globalData.domain + '/wap/v1/ctrlAc',
+        data: params,
+        header: {
+          'appId': app.globalData.appId,
+          'token': app.globalData.token,
+          'signature': app.getSign(1),
+          'timeStamp': app.getSign(0)
+        },
+        success: res => {
+          console.log('sendBody_code', res.data.errorCode);
+          let $code = res.data.errorCode;
+          if ($code === 100001) {
+            this.toastFn('请添加设备');
+          } else if ($code === 100201) {
+            this.toastFn('设备没有或离线');
+          }
+        },
+        fail: err => {
+          console.log(err);
+        }
+      })
+    }, 350);
   },
   /**
    * 获取当前功能
@@ -718,7 +726,10 @@ Page({
    * 页面相关事件处理函数--监听用户下拉动作
    */
   onPullDownRefresh: function () {
-
+    console.log('你拉了嘛？');
+    this.getDevList();
+    this.getCurPower();
+    this.getTodayBattery();
   },
 
   /**

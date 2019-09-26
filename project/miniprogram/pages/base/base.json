@@ -2,5 +2,6 @@
   "usingComponents": {
     "fade-up": "../../components/fadeUp/fadeUp",
     "delay-box": "../../components/delayBox/delayBox"
-  }
+  },
+  "enablePullDownRefresh": true
 }

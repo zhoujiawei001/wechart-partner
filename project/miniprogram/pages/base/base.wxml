@@ -7,7 +7,7 @@
   <view class="statusBar {{devStatus.power?'active_1': ''}}">
     <view class="bar-lf">
       <view class="online">{{devStatus.power?'已开启':'已关闭'}}</view>
-      <view class="name">大金空调</view>
+      <view class="name">{{devName}}</view>
     </view>
     <image class="bar-rt" bindtap="switchFn" src="../../images/switch.png"></image>
   </view>

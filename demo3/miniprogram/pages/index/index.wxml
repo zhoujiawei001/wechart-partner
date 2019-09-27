@@ -1,8 +1,10 @@
 <input 
   bindinput="getMac"
+  value="{{inputVal}}"
   class="inputSty" 
-  placeholder="请输入mac地址" 
-  placeholder-style="color: #ddd"/>
+  placeholder="输入MAC地址（不区分大小写）" 
+  placeholder-style="color: #ddd; font-size: 12px"
+  auto-focus="{{true}}"/>
 <button 
   class="btn" 
   type="primary" 

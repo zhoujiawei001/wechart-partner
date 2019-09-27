@@ -478,6 +478,7 @@ Page({
             image: '../../images/warn.png'
           })
         }
+        wx.stopPullDownRefresh()
       },
       fail: err => {
         console.log(err)

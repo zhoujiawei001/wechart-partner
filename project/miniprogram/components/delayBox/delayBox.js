@@ -12,7 +12,6 @@ import { calcCurrentTime } from '../../utils/index.js'
 Component({
   lifetimes: {
     attached: function () {
-      console.log('执行');
       this.setData({
         closeTxt: this.calcCloseAir(this.data.value[0], this.data.value[1])
       })

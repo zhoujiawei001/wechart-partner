@@ -6,6 +6,7 @@ Page({
   data: {
     motto: 'Hello World',
     isLoading: false,
+    inputVal: ''
   },
   // 获取macs地址
   getMac: function (e) {
@@ -49,8 +50,21 @@ Page({
         macs: app.globalData.macs
       },
       success: res => {
+        this.setData({
+          isLoading: false
+        })
         console.log('res', res);
         console.log('appid', app.globalData.appId, app.globalData.token, app.globalData.macs);
+        wx.setStorage({
+          key: 'k_mac',
+          data: app.globalData.macs,
+          success: res => {
+            console.log('setStorage_suc', res);
+          },
+          fail: err => {
+            console.log('setStorage_fail', err);
+          }
+        })
         let code = res.data.errorCode;
         let msg = res.data.message;
         if (code === 0) {
@@ -72,10 +86,7 @@ Page({
             }
           })
         } else {
-          app.globalData.token = 'oaudd5Xk70stFxWAXglGEgLrUaHI';
-          this.setData({
-            isLoading: false
-          })
+          // app.globalData.token = 'oaudd5Xk70stFxWAXglGEgLrUaHI';
           wx.showToast({
             title: msg,
             image: '../../images/warn.png'
@@ -106,5 +117,17 @@ Page({
     })
   },
   onLoad: function () {
+    wx.getStorage({
+      key: 'k_mac',
+      success: res => {
+        console.log(res.data)
+        if (res.data) {
+          this.setData({
+            inputVal: res.data
+          })
+          app.globalData.macs = res.data;
+        }
+      },
+    })
   }
 })

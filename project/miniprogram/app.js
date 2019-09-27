@@ -2,7 +2,7 @@
 import md5 from './utils/md5.js'
 App({
   onLaunch: function (options) {
-    console.log('app.onLaunch2', options.referrerInfo);
+    console.log('app.onLaunch', options.referrerInfo);
     let $extraData = options.referrerInfo.extraData;
     if (!wx.cloud) {
       console.error('请使用 2.2.3 或以上的基础库以使用云能力')
@@ -28,7 +28,7 @@ App({
       deviceId: ''
     }
     if (JSON.stringify(options.referrerInfo) === '{}') {
-      console.log('没有传入参数')
+      console.log('没有传入参数-onLaunch')
       // this.globalData.appId = '94d3b83bd9f00589acac31520664993e';
       // this.globalData.macs = '5CCF7FB6BCEB'; // 68C63AA51271, 5CCF7FB6BCEB
       // this.globalData.token = 'oaudd5Xk70stFxWAXglGEgLrUaHI';
@@ -37,7 +37,7 @@ App({
         image: './images/warn.png'
       })
     } else {
-      console.log('传入了真实参数')
+      console.log('传入了真实参数-onLaunch')
       this.globalData.appId = $extraData.appId;
       this.globalData.macs = $extraData.macs;
       this.globalData.token = $extraData.token;
@@ -55,6 +55,25 @@ App({
       } else {
         return $timestamp;
       }
+    }
+  },
+  onShow: function (options) {
+    console.log('app.onshow', options.referrerInfo);
+    let $extraData = options.referrerInfo.extraData;
+    if (JSON.stringify(options.referrerInfo) === '{}') {
+      console.log('没有传入参数-onShow')
+      // this.globalData.appId = '94d3b83bd9f00589acac31520664993e';
+      // this.globalData.macs = '5CCF7FB6BCEB'; // 68C63AA51271, 5CCF7FB6BCEB
+      // this.globalData.token = 'oaudd5Xk70stFxWAXglGEgLrUaHI';
+      wx.showToast({
+        title: '请传入参数',
+        image: './images/warn.png'
+      })
+    } else {
+      console.log('传入了真实参数-onShow')
+      this.globalData.appId = $extraData.appId;
+      this.globalData.macs = $extraData.macs;
+      this.globalData.token = $extraData.token;
     }
   }
 })

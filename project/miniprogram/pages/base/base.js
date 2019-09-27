@@ -453,9 +453,11 @@ Page({
         macs: app.globalData.macs
       },
       success: (res) => {
+        console.log('getDevList', res);
         console.log('getDevList_code', res.data.errorCode);
         console.log('getDevList_data', res.data.data);
         let code = res.data.errorCode;
+        let msg = res.data.message;
         if (code === 0) {
           if (res.data.data.length > 0) {
             this.setData({
@@ -470,6 +472,11 @@ Page({
               image: '../../images/warn.png'
             })
           }
+        } else {
+          wx.showToast({
+            title: msg,
+            image: '../../images/warn.png'
+          })
         }
       },
       fail: err => {
@@ -493,9 +500,11 @@ Page({
         'timeStamp': app.getSign(0)
       },
       success: res => {
+        console.log('getDevDetails', res);
         console.log('getDevDetails_code', res.data.errorCode);
         console.log('getDevDetails_data', res.data.data);
         let code = res.data.errorCode;
+        let msg = res.data.message;
         let $res = res.data.data;
         if (code === 0) {
           this.setData({
@@ -520,6 +529,11 @@ Page({
             ['devStatus.windUd']: $res.functions.attributes[$res.state.mode].windUd? $res.state.windUd : 0
           })
           this.judgeDelayIsOpen(this.data.delayOff);
+        } else {
+          wx.showToast({
+            title: msg,
+            image: '../../images/warn.png'
+          })
         }
       },
       fail: err => {
@@ -603,12 +617,13 @@ Page({
         'timeStamp': app.getSign(0)
       },
       success: res => {
-        // console.log('geCurPower_code', res.data.errorCode);
-        // console.log('getCurPower_data', res.data.data.value);
+        console.log('getCurPower', res);
+        console.log('geCurPower_code', res.data.errorCode);
+        console.log('getCurPower_data', res.data.data);
         let $code = res.data.errorCode;
         let $data = res.data.data;
-        let $val = res.data.data.value;
         if ($code === 0) {
+          let $val = res.data.data.value;
           this.setData({
             curPower: $val.substring(0, $val.length - 2)
           })
@@ -639,12 +654,13 @@ Page({
         'timeStamp': app.getSign(0)
       },
       success: res => {
-        // console.log('getTodayBatteryRq_code', res.data.errorCode);
-        // console.log('getTodayBatteryRq_data', res.data.data.value);
+        console.log('getTodayBatteryRq', res);
+        console.log('getTodayBatteryRq_code', res.data.errorCode);
+        console.log('getTodayBatteryRq_data', res.data.data);
         let $code = res.data.errorCode;
         let $data = res.data.data;
-        let $val = res.data.data.value;
         if ($code === 0) {
+          let $val = res.data.data.value;
           this.setData({
             todayPower: $val.substring(0, $val.length - 2)
           })
@@ -674,9 +690,11 @@ Page({
     wx.cloud.callFunction({
       name: 'login'
     }).then(res => {
-      this.getDevList();
-      this.getCurPower();
-      this.getTodayBattery();
+      if (app.globalData.appId) {
+        this.getDevList();
+        this.getCurPower();
+        this.getTodayBattery();
+      }
     }).catch(err => {
       console.log(err);
     })

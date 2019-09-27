@@ -1,9 +1,8 @@
 //app.js
 import md5 from './utils/md5.js'
 App({
-  onLaunch: function (options) {
-    console.log('app.onLaunch2', options.referrerInfo);
-    let $extraData = options.referrerInfo.extraData;
+  onLaunch: function () {
+    
     if (!wx.cloud) {
       console.error('请使用 2.2.3 或以上的基础库以使用云能力')
     } else {
@@ -18,33 +17,14 @@ App({
     }
 
     this.globalData = {
-      domain: 'https://mpapi.yaokantv.com',
-      appId: '',
-      macs: '',
-      token: '',
-      signature: '',
-      timeStamp: '',
-      delayOn: {},
-      deviceId: ''
+      appId: '94d3b83bd9f00589acac31520664993e',
+      token: '', // oaudd5Xk70stFxWAXglGEgLrUaHI
+      macs: '' // 5CCF7FB6BCEB
     }
-    if (JSON.stringify(options.referrerInfo) === '{}') {
-      console.log('没有传入参数')
-      // this.globalData.appId = '94d3b83bd9f00589acac31520664993e';
-      // this.globalData.macs = '5CCF7FB6BCEB'; // 68C63AA51271, 5CCF7FB6BCEB
-      // this.globalData.token = 'oaudd5Xk70stFxWAXglGEgLrUaHI';
-      wx.showToast({
-        title: '请传入参数',
-        image: './images/warn.png'
-      })
-    } else {
-      console.log('传入了真实参数')
-      this.globalData.appId = $extraData.appId;
-      this.globalData.macs = $extraData.macs;
-      this.globalData.token = $extraData.token;
-    }
+
     /**
-   * 通过md5处理获取sign
-   */
+  * 通过md5处理获取sign
+  */
     this.getSign = val => {
       let $timestamp = Date.parse(new Date()) / 1000;
       let signStr = this.globalData.appId + $timestamp;

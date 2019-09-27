@@ -1,0 +1,10 @@
+<input 
+  bindinput="getMac"
+  class="inputSty" 
+  placeholder="请输入mac地址" 
+  placeholder-style="color: #ddd"/>
+<button 
+  class="btn" 
+  type="primary" 
+  loading="{{isLoading}}"
+  bindtap="goToTest">进入测试</button>

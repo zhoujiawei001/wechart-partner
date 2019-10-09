@@ -216,9 +216,10 @@ Page({
   clickDelaySure: function (e) {
     const val = e.detail; // 选中的时间
     let curTimestamp = Date.parse(new Date()); // 当前时间戳
+    console.log('curTimestamp', curTimestamp);
     let totalTimestamp = val[0] * 3600000 + val[1] * 60000 + curTimestamp; // 将来要执行的绝对时间
+    console.log('totalTimestamp', totalTimestamp);
     /** 如果倒计时id为0则是创建，id非0则是编辑 **/
-    console.log(this.data.delayOff);
     if (this.data.delayOff.id) {
       console.log('编辑倒计时关');
       this.editDelay(totalTimestamp / 1000);
@@ -229,6 +230,7 @@ Page({
   },
   // 编辑倒计时关
   editDelay: function (runtime) {
+    console.log('runtime', runtime);
     wx.request({
       method: 'POST',
       url: app.globalData.domain + '/wap/v1/timerEdit',
@@ -586,6 +588,7 @@ Page({
         success: res => {
           console.log('sendBody_code', res.data.errorCode);
           let $code = res.data.errorCode;
+          let msg = res.data.message;
           if ($code === 100001) {
             this.toastFn('请添加设备');
           } else if ($code === 100201) {

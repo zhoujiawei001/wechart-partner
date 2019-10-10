@@ -318,7 +318,8 @@ Page({
           this.setData({
             ['delayOff.state']: 0,
             hhmmss: '',
-            delayTimer: null
+            delayTimer: null,
+            ['devStatus.power']: 0            
           })
         }
       }, 1000);

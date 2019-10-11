@@ -359,7 +359,13 @@ Page({
         success: res => {
           console.log('closeDelayOff', res.data.errorCode);
           if (res.data.errorCode === 0) {
-            this.getDevDetails();
+            // this.getDevDetails();
+            clearInterval(this.data.delayTimer);
+            this.setData({
+              ['delayOff.state']: 0,
+              hhmmss: '',
+              delayTimer: null
+            })
           }
         },
         fail: err => {

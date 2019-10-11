@@ -121,7 +121,8 @@ Page({
             icon: 'success',
             duration: 2000
           })
-          this.getDevDetails();
+          // this.getDevDetails();
+          app.globalData.delayOn = params;
         }
       },
       fail: err => {

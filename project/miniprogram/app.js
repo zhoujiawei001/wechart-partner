@@ -29,9 +29,9 @@ App({
     }
     if (JSON.stringify(options.referrerInfo) === '{}') {
       console.log('没有传入参数-onLaunch')
-      this.globalData.appId = '94d3b83bd9f00589acac31520664993e';
-      this.globalData.macs = '5CCF7FB6BCEB'; // 68C63AA51271, 5CCF7FB6BCEB
-      this.globalData.token = 'oaudd5Xk70stFxWAXglGEgLrUaHI';
+      // this.globalData.appId = '94d3b83bd9f00589acac31520664993e';
+      // this.globalData.macs = '5CCF7FB6BCEB'; // 68C63AA51271, 5CCF7FB6BCEB
+      // this.globalData.token = 'oaudd5Xk70stFxWAXglGEgLrUaHI';
       wx.showToast({
         title: '请传入参数',
         image: './images/warn.png'

@@ -100,11 +100,11 @@
   </view>
   <!-- 第四部分（定时开） -->
   <view class="part-4" bindtap="goToTimer">
-    <view class="txt" style="color: {{delayOn.state&&devStatus.power? '': '#000'}}">
+    <view class="txt" style="color: {{delayOn.state? '': '#000'}}">
       <text class="g-txt">定时开关</text>
       <text class="s-txt" wx:if="{{delayOn.state}}">{{showDelayOn.p_time}}打开空调，{{showDelayOn.l_time}}，{{showDelayOn.date}}</text>
     </view>
-    <image catchtap="switchDelayOn" class="icon" src="../../images/{{devStatus.power? '':'blackIcon/'}}silder_{{delayOn.state?delayOn.state:0}}.png"></image>
+    <image catchtap="switchDelayOn" class="icon" src="../../images/silder_{{delayOn.state?delayOn.state:0}}.png"></image>
   </view>
 </scroll-view>
 

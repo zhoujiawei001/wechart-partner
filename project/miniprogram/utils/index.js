@@ -165,7 +165,7 @@ export function getYears (cloudData) {
         let sumArr = arr.map(item_4 => {
           return item_4.value
         })
-        item_1.valArr[i + 1] = sum_arr(sumArr);
+        item_1.valArr[i] = sum_arr(sumArr);
       }
     })
     return item_1;

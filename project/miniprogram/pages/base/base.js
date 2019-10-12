@@ -384,17 +384,18 @@ Page({
       this.setData({
         clickTimer: null
       })
+      let $data = {
+        id: $delayOn.id,
+        runtime: $delayOn.runtime,
+        lifetime: $delayOn.lifetime,
+        repeatDay: $delayOn.repeatDay,
+        state: +!$delayOn.state
+      }
       this.data.clickTimer = setTimeout(() => {
         wx.request({
           method: 'POST',
           url: app.globalData.domain + '/wap/v1/timerEdit',
-          data: {
-            id: $delayOn.id,
-            runtime: $delayOn.runtime,
-            lifetime: $delayOn.lifetime,
-            repeatDay: $delayOn.repeatDay,
-            state: +!$delayOn.state
-          },
+          data: $data,
           header: {
             'appId': app.globalData.appId,
             'token': app.globalData.token,
@@ -404,7 +405,11 @@ Page({
           success: res => {
             console.log('editDelayOn', res.data.errorCode);
             if (res.data.errorCode === 0) {
-              this.getDevDetails();
+              // this.getDevDetails();
+              app.globalData.delayOn = $data;
+              this.setData({
+                delayOn: $data
+              })
             }
             setTimeout(() => {
               this.setData({

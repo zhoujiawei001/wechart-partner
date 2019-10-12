@@ -67,7 +67,7 @@ App({
       // this.globalData.token = 'oaudd5Xk70stFxWAXglGEgLrUaHI';
       wx.showToast({
         title: '请传入参数',
-        image: './images/warn.png'
+        image: '../../images/warn.png'
       })
     } else {
       console.log('传入了真实参数-onShow')

@@ -720,7 +720,8 @@ Page({
       image: '../../images/warn.png'
     })
   },
-  onLoad: function (options) {
+  /**第一次加载数据 */
+  fastLoadData: function () {
     wx.cloud.callFunction({
       name: 'login'
     }).then(res => {
@@ -732,6 +733,9 @@ Page({
     }).catch(err => {
       console.log(err);
     })
+  },
+  onLoad: function (options) {
+    this.fastLoadData();
   },
   /**
    * 跳去定时开页面
@@ -758,6 +762,7 @@ Page({
       ['showDelayOn.date']: this.delayOnRepeatDay($delayOn.repeatDay),
       delayOn: $delayOn
     })
+    this.fastLoadData();
   },
 
   /**

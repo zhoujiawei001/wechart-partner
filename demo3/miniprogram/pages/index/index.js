@@ -3,38 +3,25 @@
 const app = getApp()
 
 Page({
+  arr: [],
   data: {
-    motto: 'Hello World',
-    isLoading: false,
-    inputVal: ''
+    formList: ['','','']
   },
   // 获取macs地址
   getMac: function (e) {
-    app.globalData.macs = e.detail.value;
+    this.arr[e.target.dataset.id] = e.detail.value;
+    app.globalData.macs = this.arr.join(',');
   },
   // 进入Test程序
   goToTest: function () {
-    if (app.globalData.macs) {
-      this.setData({
-        isLoading: true
-      })
-      wx.cloud.callFunction({
-        name: 'login'
-      }).then(res => {
-        app.globalData.token = res.result.openid;
-        this.addWhiteList();
-      }).catch(err => {
-        this.setData({
-          isLoading: false
-        })
-        console.log('err', err);
-      })
-    } else {
-      wx.showToast({
-        title: '请输入mac地址',
-        image: '../../images/warn.png'
-      })
-    }
+    wx.cloud.callFunction({
+      name: 'login'
+    }).then(res => {
+      app.globalData.token = res.result.openid;
+      this.addWhiteList();
+    }).catch(err => {
+      console.log('err', err);
+    })
   },
   // macs加入白名单
   addWhiteList: function () {
@@ -50,9 +37,6 @@ Page({
         macs: app.globalData.macs
       },
       success: res => {
-        this.setData({
-          isLoading: false
-        })
         console.log('res', res);
         console.log('appid', app.globalData.appId, app.globalData.token, app.globalData.macs);
         wx.setStorage({
@@ -109,9 +93,6 @@ Page({
         }
       },
       fail: err => {
-        this.setData({
-          isLoading: false
-        })
         console.log('err', err);
       }
     })
@@ -121,12 +102,29 @@ Page({
       key: 'k_mac',
       success: res => {
         console.log(res.data)
-        if (res.data) {
+        let $arr = res.data.split(',');
+        if ($arr.length === 0) {
           this.setData({
-            inputVal: res.data
+            formList: ['', '', '']
           })
-          app.globalData.macs = res.data;
+          this.arr = ['', '', ''];
+        } else if ($arr.length === 1) {
+          this.setData({
+            formList: [$arr[0], '', '']
+          })
+          this.arr = [$arr[0], '', ''];
+        } else if ($arr.length === 2) {
+          this.setData({
+            formList: [$arr[0], $arr[1], '']
+          })
+          this.arr = [$arr[0], $arr[1], ''];
+        } else {
+          this.setData({
+            formList: $arr
+          })
+          this.arr = $arr;
         }
+        app.globalData.macs = res.data;
       },
     })
   }

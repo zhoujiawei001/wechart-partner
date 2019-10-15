@@ -473,6 +473,7 @@ Page({
    * 获取设备列表
    */
   getDevList: function () {
+    console.log('dev_macs', app.globalData.macs);
     wx.request({
       url: app.globalData.domain + '/wap/v1/remotes', //仅为示例，并非真实的接口地址
       header: {
@@ -486,8 +487,6 @@ Page({
       },
       success: (res) => {
         console.log('getDevList', res);
-        console.log('getDevList_code', res.data.errorCode);
-        console.log('getDevList_data', res.data.data);
         let code = res.data.errorCode;
         let msg = res.data.message;
         if (code === 0) {
@@ -534,8 +533,6 @@ Page({
       },
       success: res => {
         console.log('getDevDetails', res);
-        console.log('getDevDetails_code', res.data.errorCode);
-        console.log('getDevDetails_data', res.data.data);
         let code = res.data.errorCode;
         let msg = res.data.message;
         let $res = res.data.data;
@@ -573,26 +570,6 @@ Page({
         console.log(err);
       }
     })
-  },
-  // 判断扫风公共方法
-  windPub: function (val, param) {
-    switch (val) {
-      case 0:
-        this.setData({
-          ['devStatus.windUd']: 0
-        });
-        break
-      case 1:
-        this.setData({
-          ['devStatus.windUd']: 1
-        });
-        break
-      default:
-        this.setData({
-          ['devStatus.windUd']: 3
-        })
-        break
-    }
   },
   /**
    * 发送信息给设备
@@ -652,8 +629,6 @@ Page({
       },
       success: res => {
         console.log('getCurPower', res);
-        console.log('geCurPower_code', res.data.errorCode);
-        console.log('getCurPower_data', res.data.data);
         let $code = res.data.errorCode;
         let $data = res.data.data;
         if ($code === 0) {
@@ -689,8 +664,6 @@ Page({
       },
       success: res => {
         console.log('getTodayBatteryRq', res);
-        console.log('getTodayBatteryRq_code', res.data.errorCode);
-        console.log('getTodayBatteryRq_data', res.data.data);
         let $code = res.data.errorCode;
         let $data = res.data.data;
         if ($code === 0) {
@@ -735,6 +708,7 @@ Page({
     })
   },
   onLoad: function (options) {
+    console.warn('onLoad-fastLoadData');
     this.fastLoadData();
   },
   /**
@@ -762,7 +736,6 @@ Page({
       ['showDelayOn.date']: this.delayOnRepeatDay($delayOn.repeatDay),
       delayOn: $delayOn
     })
-    this.fastLoadData();
   },
 
   /**
@@ -783,7 +756,6 @@ Page({
    * 页面相关事件处理函数--监听用户下拉动作
    */
   onPullDownRefresh: function () {
-    console.log('你拉了嘛？');
     this.getDevList();
     this.getCurPower();
     this.getTodayBattery();

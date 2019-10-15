@@ -139,6 +139,13 @@ Page({
    */
   handleSelectItem: function (e) {
     let $n = e.detail.split('-');
+    if (this.data.deviceId === '') {
+      wx.showToast({
+        title: '请添加设备',
+        image: '../../images/warn.png'
+      })
+      return
+    }
     let $attr = this.data.devDetails.attributes[$n[1]]
     if ($n[0] === 'mode') {
       this.setData({
@@ -250,6 +257,13 @@ Page({
       success: res => {
         console.log('editDelay', res.data.errorCode);
         if (res.data.errorCode === 0) {
+          if (this.data.deviceId === '') {
+            wx.showToast({
+              title: '请添加设备',
+              image: '../../images/warn.png'
+            })
+            return;
+          }
           this.getDevDetails();
         }
         setTimeout(() => {
@@ -284,6 +298,10 @@ Page({
       success: res => {
         console.log('createDelay', res.data.errorCode);
         if (res.data.errorCode === 0) {
+          if (this.data.deviceId === '') {
+            this.toastFn('请添加设备');
+            return;
+          }
           this.getDevDetails();
         }
         setTimeout(() => {

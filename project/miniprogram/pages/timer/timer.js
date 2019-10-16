@@ -38,7 +38,9 @@ Page({
       type: 1,
       runtime: 0,
       lifetime: 0,
-      repeatDay: ''
+      repeatDay: '',
+      state: 1,
+      id: 99
     },
     e_params: { // 修改定时任务的参数
       id: '',
@@ -115,6 +117,7 @@ Page({
       },
       success: res => {
         console.log('createdOrEditDelayOn', res.data.errorCode);
+        let msg = res.data.message;
         if (res.data.errorCode === 0) {
           wx.showToast({
             title: '设置成功',
@@ -123,6 +126,11 @@ Page({
           })
           // this.getDevDetails();
           app.globalData.delayOn = params;
+        } else {
+          wx.showToast({
+            title: msg,
+            image: '../../images/warn.png'
+          })
         }
       },
       fail: err => {

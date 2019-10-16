@@ -19,7 +19,8 @@ App({
     this.globalData = {
       appId: '94d3b83bd9f00589acac31520664993e',
       token: '', // oaudd5Xk70stFxWAXglGEgLrUaHI
-      macs: '' // 5CCF7FB6BCEB
+      macs: '', // 5CCF7FB6BCEB
+      macsArr: []
     }
 
     /**

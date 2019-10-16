@@ -94,5 +94,6 @@
   align-items: center;
 }
 .btn:active {
-  background-color: #ddd;
+  background-color: #3479C7;
+  color: #fff;
 }

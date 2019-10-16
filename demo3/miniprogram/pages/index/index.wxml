@@ -19,8 +19,8 @@
           <text class="babel">遥控中心ID:</text>
           <input class="input" value="{{item}}" bindinput="getMac" data-id="{{index}}"></input>
         </view>
-        <view class="item_rt">
-          <image src="../../images/scan.png"></image>
+        <view class="item_rt" bindtap="getScanCode" data-id="{{index}}">
+          <image data-id="{{index}}" src="../../images/scan.png"></image>
         </view>
       </view>
     </view>

@@ -619,7 +619,7 @@ Page({
     wx.request({
       url: app.globalData.domain + '/wap/v1/power',
       data: {
-        mac: app.globalData.macs
+        mac: app.globalData.macs.replace(/,/g, ''),
       },
       header: {
         'appId': app.globalData.appId,
@@ -654,7 +654,7 @@ Page({
     wx.request({
       url: app.globalData.domain + '/wap/v1/powerDay',
       data: {
-        mac: app.globalData.macs
+        mac: app.globalData.macs.replace(/,/g, ''),
       },
       header: {
         'appId': app.globalData.appId,

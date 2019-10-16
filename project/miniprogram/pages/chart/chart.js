@@ -154,7 +154,7 @@ Page({
     wx.request({
       url: app.globalData.domain + '/wap/v1/powerQuery',
       data: {
-        mac: app.globalData.macs,
+        mac: app.globalData.macs.replace(/,/g,  ''),
         unit: unit,
         timeBegin: this.getTimeStamp(1),
         timeEnd: this.getTimeStamp(0)

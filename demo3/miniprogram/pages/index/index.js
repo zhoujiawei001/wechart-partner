@@ -3,7 +3,7 @@
 const app = getApp()
 
 Page({
-  arr: [],
+  arr: ['','',''],
   data: {
     formList: ['','','']
   },
@@ -11,6 +11,23 @@ Page({
   getMac: function (e) {
     this.arr[e.target.dataset.id] = e.detail.value;
     app.globalData.macs = this.arr.join(',');
+  },
+  /**扫码获取mac */
+  getScanCode: function (e) {
+    wx.scanCode({
+      success: res => {
+        console.log(res.result);
+        let $arr = res.result.split(":");
+        let $str = $arr.join('');
+        console.log($str);
+        let $idx = e.target.dataset.id;
+        this.arr[+$idx] = $str;
+        this.setData({
+          formList: this.arr
+        })
+        app.globalData.macs = this.arr.join(',');
+      }
+    })
   },
   // 进入Test程序
   goToTest: function () {
@@ -97,33 +114,16 @@ Page({
       }
     })
   },
-  onLoad: function () {
+  onLoad: function (options) {
     wx.getStorage({
       key: 'k_mac',
       success: res => {
-        console.log(res.data)
         let $arr = res.data.split(',');
-        if ($arr.length === 0) {
-          this.setData({
-            formList: ['', '', '']
-          })
-          this.arr = ['', '', ''];
-        } else if ($arr.length === 1) {
-          this.setData({
-            formList: [$arr[0], '', '']
-          })
-          this.arr = [$arr[0], '', ''];
-        } else if ($arr.length === 2) {
-          this.setData({
-            formList: [$arr[0], $arr[1], '']
-          })
-          this.arr = [$arr[0], $arr[1], ''];
-        } else {
-          this.setData({
-            formList: $arr
-          })
-          this.arr = $arr;
-        }
+        console.log('$arr', $arr);
+        this.setData({
+          formList: $arr
+        })
+        this.arr = $arr;
         app.globalData.macs = res.data;
       },
     })
